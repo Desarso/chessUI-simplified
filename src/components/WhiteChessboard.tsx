@@ -75,9 +75,6 @@ function WhiteChessboard({
     board().moveLegally(move.from, move.to, selection.toLowerCase());
   }
 
-  function delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 
   //later I will make a black board, and white board component and just change all the settings accordingly
   return (

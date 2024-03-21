@@ -350,17 +350,10 @@ export function DragDropContextProvider(props: any) {
       
       });
       document.addEventListener("pointerup", () => {
-        // if(droppable.ref.children.length === 0){
-        //   droppable.occupied = false;
-        // }
-        // if(droppable.ref.children.length > 0){
-        //   droppable.occupied = true;
-        // }
         if(!droppable.hovering) return;
         droppable.hovering = false;
         droppable.hoverOut(previousTarget());
         if(previousTarget() == null) return;
-        // if(droppable.occupied) return;
         if(droppable.droppable === false) return;
 
 

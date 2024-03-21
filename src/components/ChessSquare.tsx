@@ -55,8 +55,6 @@ function ChessSquare({
     }, droppable);
 
     onGlobalDragStart((e: any) => {
-      // console.log("global drag start", e);
-      // if(OpponentsPawnAtEnd())return;
       if(board().moveIndex != board().History.length-1) return;
       if (displayInlay()) {
         return;
@@ -82,7 +80,6 @@ function ChessSquare({
             }
           }
           piece.children[0]?.classList.add("circle");
-          // droppable.ref.children[0]?.children[0]?.classList.add("circle");
         }
       } else {
         droppable.droppable = false;
@@ -114,10 +111,6 @@ function ChessSquare({
       //loop over all droppables and if their id matches lastMove, add class lastMove
     });
 
-    // console.log(draggable.ref)
-    // if (draggable.getAttribute("class").length === 0) {
-    //   draggable = undefined;
-    // }
 
     return (
       <div id={id} class={className} ref={droppable.ref}>
@@ -171,13 +164,7 @@ function ChessSquare({
     }, draggable);
 
     onDragEnd(async (e: any) => {
-      //let's think about what this function needs to do in the most basic form possible
-      //this is an input function. I takes both the input from the user and the opponent
-      //it needs to detect a move and perform it on the board, unless it is an illegal move
-      //or I need to wait and crown.
-      //so let's think about what exactly I need to do.
-      //I need to get the starting and ending index, and then move. unless there are a couple of exeptions
-      //such as the inlay being on the screen
+
       if(board().moveIndex != board().History.length-1) return;
       if (displayInlay()) return;
       let piece = board().getPieceByPosition(from);
@@ -207,7 +194,13 @@ function ChessSquare({
 
 
       to = e.id;
+
+      //here I perform most moves but not crowning moves
       board().moveLegally(from, to);
+      //we want to send a legal move to the websockets
+
+
+
     }, draggable);
 
     let piece = board().getPieceByPosition(id);
@@ -223,11 +216,10 @@ function ChessSquare({
     return piece;
   };
 
+  function delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
-  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
-  //so I would like the change in board to reflect a change in the UI
-  //this seems a bit difficult since an update to board does not seem to trigger re-render.
 
   return (
     <Droppable

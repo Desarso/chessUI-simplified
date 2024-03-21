@@ -618,7 +618,7 @@ export class Board {
     return "";
   }
 
-  private movePiece(start: string, end: string): void {
+  private async movePiece(start: string, end: string) {
     //all this function does is change the position of the piece independent of the board.
     let newMove = new Move(undefined, undefined, start, end);
     newMove.boardEndIndex;
@@ -921,6 +921,7 @@ export class Board {
         this.setLastMoveUIIndicator(newMove);
         this.moveIndex++;
         await moveSound.play();
+        
         return;
       }
     }
@@ -941,6 +942,8 @@ export class Board {
       ;
     }
     this.History.push(newMove);
+
+    await delay(1);
 
     for(let i=0;i<this.Pieces.length;i++){
       this.Pieces[i].syncUIPosition();
@@ -2777,4 +2780,9 @@ export function deepEqual(x: any, y: any): boolean {
           return isEqual && deepEqual(x[key], y[key]);
         }, true)
     : x === y;
+}
+
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

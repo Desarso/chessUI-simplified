@@ -179,205 +179,11 @@ function Home({}: Props) {
     }
   }
 
-  //sync UI board with backend board
-  async function updateBoard() {
-    //rip all pieces from board
-    // //put em back
 
-    let UIBoard = document.querySelectorAll(".chessSquare");
-    let allUIPieces = everyPiece();
-    // allUIPieces.push(...allPieces())
 
-    if (inGameColor() == "white") {
-      for (let i = 0; i < allUIPieces.length; i++) {
-        allUIPieces[i].remove();
-      }
-      let indexUsed: any = [];
-      let UIBoardIndexesUsed: any = [];
-      for (let i = 0; i < board().board.length; i++) {
-        if (board().board[i] != " ") {
-          for (let j = 0; j < allUIPieces.length; j++) {
-            if (
-              allUIPieces[j].classList.contains(board().board[i]) &&
-              !indexUsed.includes(j) &&
-              !UIBoardIndexesUsed.includes(i)
-            ) {
-              UIBoard[i].appendChild(allUIPieces[j]);
-              // console.log("found piece", allUIPieces[j]);
-              indexUsed.push(j);
-              UIBoardIndexesUsed.push(i);
-              break;
-            }
-          }
-        }
-      }
+ 
 
-      //I double check that the board is correct
-      for (let i = 0; i < board().board.length; i++) {
-        let UIboardPiece = UIBoard[i]?.querySelector(".piece");
-        if (UIboardPiece != undefined && board().board[i] != " ") {
-          if (UIboardPiece.classList.contains(board().board[i])) {
-            // console.log("piece is correct");
-          } else {
-            console.log("something is funky");
-            console.log("piece", UIboardPiece);
-            console.log("board", board().board[i]);
-            break;
-          }
-        } else if (UIboardPiece == undefined && board().board[i] != " ") {
-          console.log("something is funky");
-          console.log("piece", UIboardPiece);
-          console.log("board", board().board[i]);
-          for (let j = 0; j < allUIPieces.length; j++) {
-            if (
-              (allUIPieces[j].classList.contains("p") ||
-                allUIPieces[j].classList.contains("P")) &&
-              !indexUsed.includes(j) &&
-              !UIBoardIndexesUsed.includes(i)
-            ) {
-              console.log("found piece", allUIPieces[j]);
-              let piece = allUIPieces[j];
-              if (piece.classList.contains("p")) {
-                piece.classList.remove("p");
-                piece.classList.add(board().board[i]);
-              } else {
-                piece.classList.remove("P");
-                piece.classList.add(board().board[i]);
-              }
-              indexUsed.push(j);
-              UIBoardIndexesUsed.push(i);
-              UIBoard[i].appendChild(piece);
-            }
-          }
-          let newAllPieces = [];
-          for (let i = 0; i < allUIPieces.length; i++) {
-            if (!indexUsed.includes(i)) {
-              newAllPieces.push(allUIPieces[i]);
-            }
-          }
-          setAllPieces(newAllPieces);
-          console.log("all pieces", allPieces());
-          break;
-        }
-      }
-    } else if (inGameColor() == "black") {
-      for (let i = 0; i < allUIPieces.length; i++) {
-        allUIPieces[i].remove();
-      }
-      let indexUsed: any = [];
-      let UIBoardIndexesUsed: any = [];
-      let index = 0;
-      for (let i = board().board.length - 1; i >= 0; i--) {
-        if (board().board[i] != " ") {
-          for (let j = 0; j < allUIPieces.length; j++) {
-            if (
-              allUIPieces[j].classList.contains(board().board[i]) &&
-              !indexUsed.includes(j) &&
-              !UIBoardIndexesUsed.includes(index)
-            ) {
-              UIBoard[index].appendChild(allUIPieces[j]);
-              // console.log("found piece", allUIPieces[j]);
-              indexUsed.push(j);
-              UIBoardIndexesUsed.push(index);
-              break;
-            }
-          }
-        }
-        index++;
-      }
-      //I double check that the board is correct
-      index = 0;
-      for (let i = board().board.length - 1; i >= 0; i--) {
-        let UIboardPiece = UIBoard[index]?.querySelector(".piece");
-        if (UIboardPiece != undefined && board().board[i] != " ") {
-          if (UIboardPiece.classList.contains(board().board[i])) {
-            // console.log("piece is correct");
-          } else {
-            // console.log("something is funky");
-            // console.log("piece", UIboardPiece);
-            // console.log("board", board().board[i]);
-            break;
-          }
-        } else if (UIboardPiece == undefined && board().board[i] != " ") {
-          // console.log("something is funky");
-          // console.log("piece", UIboardPiece);
-          // console.log("board", board().board[i]);
-          for (let j = 0; j < allUIPieces.length; j++) {
-            if (
-              (allUIPieces[j].classList.contains("p") ||
-                allUIPieces[j].classList.contains("P")) &&
-              !indexUsed.includes(j) &&
-              !UIBoardIndexesUsed.includes(index)
-            ) {
-              // console.log("found piece", allUIPieces[j]);
-              let piece = allUIPieces[j];
-              if (piece.classList.contains("p")) {
-                piece.classList.remove("p");
-                piece.classList.add(board().board[i]);
-              } else {
-                piece.classList.remove("P");
-                piece.classList.add(board().board[i]);
-              }
-              UIBoard[index].appendChild(piece);
-              indexUsed.push(j);
-              UIBoardIndexesUsed.push(index);
-            }
-          }
-          let newAllPieces = [];
-          for (let i = 0; i < allUIPieces.length; i++) {
-            if (!indexUsed.includes(i)) {
-              newAllPieces.push(allUIPieces[i]);
-            }
-          }
-          setAllPieces(newAllPieces);
-          console.log("all pieces", allPieces());
-          break;
-        }
-        index++;
-      }
-    }
 
-    // board().displayBoard();
-    // console.log("moves", moves());
-    let boardUpdated = new Event("boardUpdated");
-    document.dispatchEvent(boardUpdated);
-    checkBoardState();
-  }
-
-  function checkBoardState() {
-    let possibleMoves = board().findLegalMoves(board());
-    let checked = board().isInCheck(board());
-    // console.log("checked", checked);
-    let previousChecked = document.querySelector(".checked");
-    if (previousChecked != null) {
-      previousChecked.classList.remove("checked");
-    }
-
-    if (checked) {
-      //let's find the king of the correct color
-      for (let i = 0; i < board().Pieces.length; i++) {
-        if (
-          board().Pieces[i].type == "k" &&
-          board().Pieces[i].color == board().currentTurnColor
-        ) {
-          console.log("made it here");
-          let king = board().Pieces[i];
-          console.log("king", king);
-          console.log("king position", king.getPosition());
-          let UIKingSquare = document.getElementById(king.getPosition());
-          console.log("UIKingSquare", UIKingSquare);
-          UIKingSquare?.classList.add("checked");
-        }
-      }
-    }
-  }
-
-  //to-do
-  function checkMateFunction() {
-    //need to write this function
-    //I must delete game from backend
-    //and
-  }
 
   //revise
   async function updateAllBoards(result: any) {
@@ -483,7 +289,7 @@ function Home({}: Props) {
   return (
     <>
       <BallsBackground />
-      <Show when={!inSession() && inGame() == false}>
+      {/* <Show when={!inSession() && inGame() == false}>
         <GlassOverlay
           user={user}
           setUser={setUser}
@@ -501,7 +307,7 @@ function Home({}: Props) {
         />
       </Show>
 
-      <Show when={inGameColor() == "white" && inGame() == true}>
+      <Show when={inGameColor() == "white" && inGame() == true}> */}
         <WhiteChessboard
           board={board}
           updateBoard={updateAllBoards}
@@ -517,7 +323,7 @@ function Home({}: Props) {
           allPieces={allPieces}
           setAllPieces={setAllPieces}
         />
-      </Show>
+      {/* </Show>
       <Show
         when={
           inGame() == false || (inGameColor() == "black" && inGame() == true)
@@ -594,7 +400,7 @@ function Home({}: Props) {
             </div>
           </div>
         </div>
-      </Show>
+      </Show> */}
     </>
   );
 }
