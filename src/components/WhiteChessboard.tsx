@@ -27,12 +27,8 @@ type Props = {
 
 function WhiteChessboard({
   board,
-  updateBoard,
-  setLastMove,
-  lastMove,
   movePieceSound,
   capturePieceSound,
-  setMoves,
   moves,
   user,
   opponent,
@@ -66,13 +62,13 @@ function WhiteChessboard({
 
   //here I need to mount an event listener or alternatively I can just have
 
-  let string = displayInlayX() + "0";
 
   async function handleSelection(selection: string) {
     setInlaySelection(selection);
     setDisplayInlay(false);
     let move = crowningMove();
     board().moveLegally(move.from, move.to, selection.toLowerCase());
+    //we want to send a legal move to the websockets
   }
 
 

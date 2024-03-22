@@ -33,12 +33,8 @@ let id = 0;
 
 function BlackChessboard({
   board,
-  updateBlackBoard,
-  setLastMove,
-  lastMove,
   movePieceSound,
   capturePieceSound,
-  setMoves,
   moves,
   user,
   opponent,
@@ -69,6 +65,9 @@ function BlackChessboard({
   const [displayInlay, setDisplayInlay] = createSignal(false);
   const [displayInlayX, setDisplayInlayX] = createSignal("00");
   const [inlaySelection, setInlaySelection] = createSignal("");
+  const [crowningMove, setCrowningMove] = createSignal();
+
+
 
   //here I need to mount an event listener or alternatively I can just have
 
@@ -77,38 +76,9 @@ function BlackChessboard({
   async function handleSelection(selection: string) {
     setInlaySelection(selection);
     setDisplayInlay(false);
-    let lastMove = moves()[moves().length - 1];
-    lastMove.crownedTo = selection.toLowerCase();
-    let newMoves = moves().splice(0, moves().length - 1);
-    newMoves.push(lastMove);
-    setMoves(newMoves);
-    //need to get the piece at the position
-    //it is basically 63 - displayInlayX
-
-    let piece = board().getPieceAtBoardIndex(
-      63 - (7 - parseInt(displayInlayX()))
-    );
-    let previousType = piece.type;
-    console.log(piece);
-    piece.type = selection;
-
-    board().board[63 - (7 - parseInt(displayInlayX()))] = selection;
-    board().fen = board().boardToFen();
-    // board().displayBoard();
-    console.log(piece);
-    let UIPiece = document.getElementById(piece.position.position)?.children[0];
-    console.log("previous type:" + previousType);
-    UIPiece?.classList.remove(previousType);
-    UIPiece?.classList.add(selection);
-
-    await delay(10);
-
-    updateBlackBoard();
+    let move = crowningMove();
+    board().moveLegally(move.from, move.to, selection.toLowerCase());
     // let move = {start: lastMove().from, end: lastMove().to};
-  }
-
-  function delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   //later I will make a black board, and white board component and just change all the settings accordingly
@@ -155,10 +125,10 @@ function BlackChessboard({
           <For each={board().board}>
             {(square, index) => (
               <ChessSquare
-                style={index()}
-                pieceClassName={
-                  board().board[board().board.length - 1 - index()]
-                }
+                // style={index()}
+                // className={
+                //   board().board[board().board.length - 1 - index()]
+                // }
                 className={`chessSquare ${
                   (board().board.length - 1 - index()) % 16 < 8
                     ? (board().board.length - 1 - index()) % 2 == 0
@@ -169,23 +139,17 @@ function BlackChessboard({
                     : "lighterBackground"
                 }`}
                 id={boardIds[board().board.length - 1 - index()]}
+                index = {board().board.length - 1 - index()}
                 board={board}
-                updateBoard={updateBlackBoard}
-                draggableId={generateRandomID()}
-                eatenPieces={eatenPieces}
                 setDisplayInlay={setDisplayInlay}
                 setDisplayInlayX={setDisplayInlayX}
                 inlaySelection={inlaySelection}
                 displayInlay={displayInlay}
                 color="black"
-                setLastMove={setLastMove}
-                lastMove={lastMove}
                 movePieceSound={movePieceSound}
                 capturePieceSound={capturePieceSound}
-                setMoves={setMoves}
-                moves={moves}
-                allPieces={allPieces}
-                setAllPieces={setAllPieces}
+                setCrowningMove={setCrowningMove}
+    
               />
             )}
           </For>
@@ -200,13 +164,3 @@ function BlackChessboard({
 
 export default BlackChessboard;
 
-function generateRandomID() {
-  return Math.random().toString(36).substr(2, 9);
-}
-
-//all board positions will be represented using a number and a letter in the standard chess notations
-//all moves will be a string of two positions or 4 if its castling
-//pieces will be classes, they will be represented by a char, but will be set as a constant.
-//I should do the game at a high leve logic since, the board must keep game state.
-//The entire board logic should be done from high up. Then certain states that get passed down will be modified.
-//Remeber to make the API clean and easy to use.

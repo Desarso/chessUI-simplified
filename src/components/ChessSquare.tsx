@@ -166,16 +166,18 @@ function ChessSquare({
     onDragEnd(async (e: any) => {
 
       if(board().moveIndex != board().History.length-1) return;
+      if(e == undefined) return;
       if (displayInlay()) return;
       let piece = board().getPieceByPosition(from);
       let UIPiece = piece.UIComponent;
+
+      console.log("e is ", e);
       
       if (piece.type === "p" && piece.color === color) {
-        if (piece.color === "white" && e.id[1] === "8") {
+        if (piece.color === "white" && e?.id[1] === "8") {
           await delay(100);
           setDisplayInlay(true);
           let position = UIPiece.parentNode.id;
-          // console.log(position);
           position = position.charCodeAt(0) - 97;
           setDisplayInlayX(position);
           setCrowningMove({from: from, to: e.id});
@@ -193,7 +195,7 @@ function ChessSquare({
 
 
 
-      to = e.id;
+      to = e?.id;
 
       //here I perform most moves but not crowning moves
       board().moveLegally(from, to);

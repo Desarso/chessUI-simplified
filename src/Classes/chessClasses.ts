@@ -950,6 +950,10 @@ export class Board {
     }
     this.setLastMoveUIIndicator(newMove);
     await moveSound.play();
+    await delay(10);
+    this.Pieces.forEach((e)=> e.syncUIClass());
+    this.Pieces.forEach((e)=> e.syncUIPosition());
+
     this.moveIndex++;
 
 

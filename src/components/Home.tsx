@@ -230,12 +230,8 @@ function Home({}: Props) {
         notification.to
       );
       virtualMouse.init();
-      // console.log(virtualMouse);
       removeBackDrop();
-      // console.log("in game", inGame());
-      // console.log("in game color", inGameColor());
-    } else if (notification.type == "position") {
-      // console.log(notification);
+      board().Pieces.forEach((e)=> e.syncUIPosition())
     }
   }
 
@@ -271,6 +267,7 @@ function Home({}: Props) {
       virtualMouse.init();
       // console.log(virtualMouse);
       removeBackDrop();
+      board().Pieces.forEach((e)=> e.syncUIPosition());
     } catch (error) {
       console.log("error: ", error);
     }
@@ -289,7 +286,7 @@ function Home({}: Props) {
   return (
     <>
       <BallsBackground />
-      {/* <Show when={!inSession() && inGame() == false}>
+      <Show when={!inSession() && inGame() == false}>
         <GlassOverlay
           user={user}
           setUser={setUser}
@@ -307,7 +304,7 @@ function Home({}: Props) {
         />
       </Show>
 
-      <Show when={inGameColor() == "white" && inGame() == true}> */}
+      <Show when={inGameColor() == "white" && inGame() == true}> 
         <WhiteChessboard
           board={board}
           updateBoard={updateAllBoards}
@@ -323,7 +320,7 @@ function Home({}: Props) {
           allPieces={allPieces}
           setAllPieces={setAllPieces}
         />
-      {/* </Show>
+      </Show>
       <Show
         when={
           inGame() == false || (inGameColor() == "black" && inGame() == true)
@@ -400,7 +397,7 @@ function Home({}: Props) {
             </div>
           </div>
         </div>
-      </Show> */}
+      </Show>
     </>
   );
 }
