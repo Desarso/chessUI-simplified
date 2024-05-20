@@ -227,7 +227,8 @@ function Home({}: Props) {
       let virtualMouse = new VirtualMouse(
         chessWebSocket.ws,
         user(),
-        notification.to
+        notification.to,
+        board
       );
       virtualMouse.init();
       removeBackDrop();
@@ -262,7 +263,8 @@ function Home({}: Props) {
       let virtualMouse = new VirtualMouse(
         chessWebSocket.ws,
         user(),
-        notification.from
+        notification.from,
+        board
       );
       virtualMouse.init();
       // console.log(virtualMouse);

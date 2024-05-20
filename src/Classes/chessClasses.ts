@@ -351,6 +351,7 @@ export class Board {
   UIPieces: HTMLElement[] = [];
   History: updateMove[] = [];
   moveIndex: number = -1;
+  inLastMove: boolean = true;
 
   //constructor creates a board with all the pieces in their starting positions
   constructor(board?: string[], fen?: string) {

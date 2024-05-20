@@ -50,6 +50,7 @@ function Arrows({ board }: Props) {
     for (let i = board().moveIndex; i > -1; i--) {
       await goBackOneMove(instant);
     }
+    board().inLastMove = false;
     moveSound.play();
   }
   async function goBackOneMove(instant: boolean = false) {
@@ -59,6 +60,7 @@ function Arrows({ board }: Props) {
       block = false;
       return;
     }
+    board().inLastMove = false;
     if (board().moveIndex === -1) {
       block = false;
       return;
@@ -71,13 +73,18 @@ function Arrows({ board }: Props) {
     block = false;
   }
   async function goForwardOneMove(instant: boolean = false) {
-    console.log(board().History[board().moveIndex+1])
+    console.log(board().History.length);
+    console.log(board().moveIndex);
     block = true;
     if (board().History.length === 0) {
       block = false;
       return;
     }
+    if(board().moveIndex === 0){
+      board().inLastMove = true;
+    }
     if (board().moveIndex === board().History.length - 1) {
+      board().inLastMove = true;
       block = false;
       return;
     }
@@ -91,6 +98,7 @@ function Arrows({ board }: Props) {
       await goForwardOneMove(instant);
     }
     moveSound.play();
+    board().inLastMove = true;
   }
   return (
     <div class="arrows">

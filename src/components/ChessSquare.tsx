@@ -193,6 +193,11 @@ function ChessSquare({
         }
       }
 
+      //if square does not have a circe, return
+      if (draggable.droppable === false) {
+        return;
+      }
+
 
 
       to = e?.id;
