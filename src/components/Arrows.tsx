@@ -54,7 +54,6 @@ function Arrows({ board }: Props) {
     moveSound.play();
   }
   async function goBackOneMove(instant: boolean = false) {
-    console.log(board().History[board().moveIndex])
     block = true;
     if (board().History.length === 0) {
       block = false;
@@ -73,8 +72,6 @@ function Arrows({ board }: Props) {
     block = false;
   }
   async function goForwardOneMove(instant: boolean = false) {
-    console.log(board().History.length);
-    console.log(board().moveIndex);
     block = true;
     if (board().History.length === 0) {
       block = false;

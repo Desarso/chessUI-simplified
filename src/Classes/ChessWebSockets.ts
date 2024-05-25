@@ -6,8 +6,8 @@ import { Board } from "./chessClasses";
 
 export class ChessWebSocket{
     
-    url = "wss://gabrielmalek.com/v1/api/chessSub";
-    // url = "ws://localhost:8080/chessSub";
+    //url = "wss://gabrielmalek.com/v1/api/chessSub";
+    url = "ws://localhost:8080/chessSub";
     ws: Accessor<WebSocket>;
     setWS: Setter<WebSocket>;
     pingsSinceResponse: number = 0;
