@@ -17,8 +17,6 @@ export class ChessWebSocket{
     user: Accessor<User>;
     pings: number = 0;
     crownedIndex: number = -1;
-    moves: Accessor<updateMove[]>;
-    setMoves: Setter<updateMove[]>;
 
     constructor(board: Accessor<Board>, setBoard: Setter<Board>, user: Accessor<User>, setUser: Setter<User>,moves: Accessor<updateMove[]>,  setMoves: Setter<updateMove[]>){
         this.board = board;
@@ -125,12 +123,11 @@ export class ChessWebSocket{
                     console.log(data.fen, "vs", this.board().fen);
                     // check which board is older
                     let newBoard = new Board(undefined, data.fen);
-                    console.log("new board", newBoard);
                     this.board().fen = data.fen;
                     this.board().board = newBoard.board;
                     this.board().currentTurnColor = newBoard.currentTurnColor;
-                    this.board().capturedPieces = newBoard.capturedPieces;
-                    this.board().Pieces = newBoard.Pieces;
+                    // this.board().capturedPieces = newBoard.capturedPieces;
+                    // this.board().Pieces = newBoard.Pieces;
                     this.board().checkMate = newBoard.checkMate;
                     this.board().enPassantTargetSquare = newBoard.enPassantTargetSquare;
                     this.board().halfMoveClock = newBoard.halfMoveClock;
@@ -138,7 +135,7 @@ export class ChessWebSocket{
                     this.board().inCheck = newBoard.inCheck;
                     this.board().legalMoves = newBoard.legalMoves;
                     this.mergeMoves(data.moves);
-                    let lastMove = this.moves()[this.moves().length - 1];
+                    let lastMove = this.board().History[this.board().History.length - 1];
                     let allDroppables = document.querySelectorAll(".chessSquare");
                     for (let i = 0; i < allDroppables.length; i++) {
                       if (
@@ -150,8 +147,8 @@ export class ChessWebSocket{
                         allDroppables[i]?.classList?.remove("lastMove");
                       }
                     }
-                    let newEvent = new CustomEvent("forceBoardUpdate");
-                    document.dispatchEvent(newEvent);
+                    // let newEvent = new CustomEvent("forceBoardUpdate");
+                    // document.dispatchEvent(newEvent);
                     let crowned = this.pawnsAtEndOfBoard();
                     if(crowned){
                         // console.log("crowned");
@@ -164,17 +161,22 @@ export class ChessWebSocket{
             }
 
         });
+
+        //listen for move events
+        this.ws().addEventListener("move", (e) => {
+            console.log("move", e);
+        });
     }
 
     private mergeMoves(moves: updateMove[]){
         // console.log("merging moves");
-        let newMoves = [...this.moves()];
+        let newMoves = [...this.board().History];
         for(let i=0; i < moves.length; i++){
             let found = false;
-            for(let j=0; j < this.moves().length; j++){
-                if(moves[i].from === this.moves()[j].from && moves[i].to === this.moves()[j].to ){
+            for(let j=0; j < this.board().History.length; j++){
+                if(moves[i].from === this.board().History[j].from && moves[i].to === this.board().History[j].to ){
                     found = true;
-                    if(moves[i].crowning && !this.moves()[j].crowning){
+                    if(moves[i].crowning && !this.board().History[j].crowning){
                         newMoves[j].crowning = true;
                         newMoves[j].crownedTo = moves[i].crownedTo;
                     }
@@ -186,8 +188,8 @@ export class ChessWebSocket{
             }
         }
         console.log("new moves", newMoves);
-        console.log(newMoves.length, "vs", this.moves().length, "vs", moves.length);
-        this.setMoves(newMoves);
+        console.log(newMoves.length, "vs", this.board().History.length, "vs", moves.length);
+        this.board().History = newMoves;
 
     }
 

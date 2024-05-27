@@ -171,7 +171,6 @@ function ChessSquare({
       let piece = board().getPieceByPosition(from);
       let UIPiece = piece.UIComponent;
 
-      console.log("e is ", e);
       
       if (piece.type === "p" && piece.color === color) {
         if (piece.color === "white" && e?.id[1] === "8") {
@@ -204,6 +203,7 @@ function ChessSquare({
 
       //here I perform most moves but not crowning moves
       board().moveLegally(from, to);
+      // I want to stream the move as an event
       //we want to send a legal move to the websockets
 
 

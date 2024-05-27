@@ -1,4 +1,3 @@
-import { ConsoleMessage } from "puppeteer";
 import { updateMove } from "./Types";
 import { searchForWorkspaceRoot } from "vite";
 
@@ -12,7 +11,9 @@ const rook = "r";
 import MoveSound from "../Soundfiles/move-self.mp3";
 const moveSound = new Audio(MoveSound);
 
-
+ // this.board().capturedPieces = newBoard.capturedPieces;
+                    // this.board().Pieces = newBoard.Pieces; // this.board().capturedPieces = newBoard.capturedPieces;
+                    // this.board().Pieces = newBoard.Pieces;
 export class V2D {
   x: number;
   y: number;
@@ -348,7 +349,9 @@ export class Board {
   inCheck = false;
   checkMate = false;
   capturedPieces: Piece[] = [];
-  UIPieces: HTMLElement[] = [];
+   // this.board().capturedPieces = newBoard.capturedPieces; // this.board().capturedPieces = newBoard.capturedPieces;
+                    // this.board().Pieces = newBoard.Pieces;
+                    // this.board().Pieces = newBoard.Pieces;: HTMLElement[] = [];
   History: updateMove[] = [];
   moveIndex: number = -1;
   inLastMove: boolean = true;
@@ -893,6 +896,15 @@ export class Board {
         this.setLastMoveUIIndicator(newMove);
         this.moveIndex++;
         await moveSound.play();
+        //create a move event
+        const event = new CustomEvent("move", {
+          detail: {
+            start: start,
+            end: end,
+            promotion: prompotion,
+          },
+        });
+        document.dispatchEvent(event);
         return;
       }
     } else if (
@@ -922,6 +934,15 @@ export class Board {
         this.setLastMoveUIIndicator(newMove);
         this.moveIndex++;
         await moveSound.play();
+          //create a move event
+          const event = new CustomEvent("move", {
+            detail: {
+              start: start,
+              end: end,
+              promotion: prompotion,
+            },
+          });
+          document.dispatchEvent(event);
         
         return;
       }
@@ -951,6 +972,16 @@ export class Board {
     }
     this.setLastMoveUIIndicator(newMove);
     await moveSound.play();
+    await moveSound.play();
+    //create a move event
+    const event = new CustomEvent("move", {
+      detail: {
+        start: start,
+        end: end,
+        promotion: prompotion,
+      },
+    });
+    document.dispatchEvent(event);
     await delay(10);
     this.Pieces.forEach((e)=> e.syncUIClass());
     this.Pieces.forEach((e)=> e.syncUIPosition());

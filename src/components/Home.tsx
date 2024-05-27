@@ -100,6 +100,11 @@ function Home({}: Props) {
       updateBoard();
       movePieceSound.play();
     });
+
+    document.addEventListener("move", (event) => {
+      console.log("move event received", event);
+     chessWebSocket.sendChessUpdate(board(), user()!, opponent()!, board().History)
+    });
   }
 
   //here I send the position info
