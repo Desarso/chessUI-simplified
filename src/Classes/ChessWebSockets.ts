@@ -120,42 +120,16 @@ export class ChessWebSocket{
                 console.log("chess game update", data);
                 // console.log("equal fens", data.fen == this.board().fen)
                 if(data.fen != this.board().fen){
-                    console.log(data.fen, "vs", this.board().fen);
-                    // check which board is older
-                    let newBoard = new Board(undefined, data.fen);
-                    this.board().fen = data.fen;
-                    this.board().board = newBoard.board;
-                    this.board().currentTurnColor = newBoard.currentTurnColor;
-                    // this.board().capturedPieces = newBoard.capturedPieces;
-                    // this.board().Pieces = newBoard.Pieces;
-                    this.board().checkMate = newBoard.checkMate;
-                    this.board().enPassantTargetSquare = newBoard.enPassantTargetSquare;
-                    this.board().halfMoveClock = newBoard.halfMoveClock;
-                    this.board().fullMoveNumber = newBoard.fullMoveNumber;
-                    this.board().inCheck = newBoard.inCheck;
-                    this.board().legalMoves = newBoard.legalMoves;
-                    this.mergeMoves(data.moves);
-                    let lastMove = this.board().History[this.board().History.length - 1];
-                    let allDroppables = document.querySelectorAll(".chessSquare");
-                    for (let i = 0; i < allDroppables.length; i++) {
-                      if (
-                        allDroppables[i].id === lastMove.from ||
-                        allDroppables[i].id === lastMove.to
-                      ) {
-                        allDroppables[i]?.classList?.add("lastMove");
-                      } else {
-                        allDroppables[i]?.classList?.remove("lastMove");
-                      }
+                    const newMoves = this.getNewMoves(data.moves);
+                   console.log(newMoves);
+                   //execute all the newMoves
+                   for(let i=0;i<newMoves.length; i++){
+                    if(newMoves[i].crowning){
+                        this.board().moveLegally(newMoves[i].from, newMoves[i].to, newMoves[i].crownedTo);
+                    }else{
+                        this.board().moveLegally(newMoves[i].from, newMoves[i].to);
                     }
-                    // let newEvent = new CustomEvent("forceBoardUpdate");
-                    // document.dispatchEvent(newEvent);
-                    let crowned = this.pawnsAtEndOfBoard();
-                    if(crowned){
-                        // console.log("crowned");
-                        let event = new CustomEvent("crowned");
-                        event.data = newBoard;
-                        document.dispatchEvent(event);
-                    }
+                   }
                 }
 
             }
@@ -168,9 +142,9 @@ export class ChessWebSocket{
         });
     }
 
-    private mergeMoves(moves: updateMove[]){
+    private getNewMoves(moves: updateMove[]){
         // console.log("merging moves");
-        let newMoves = [...this.board().History];
+        let newMoves = [];
         for(let i=0; i < moves.length; i++){
             let found = false;
             for(let j=0; j < this.board().History.length; j++){
@@ -187,9 +161,7 @@ export class ChessWebSocket{
                 newMoves.push(moves[i]);
             }
         }
-        console.log("new moves", newMoves);
-        console.log(newMoves.length, "vs", this.board().History.length, "vs", moves.length);
-        this.board().History = newMoves;
+        return newMoves;
 
     }
 
