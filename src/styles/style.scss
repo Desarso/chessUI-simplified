@@ -9,7 +9,7 @@ body,
   width: 100%;
   height: 100%;
   padding: 0px;
-  background-color: rgb(8, 18, 51, 0);
+  background-color: rgba(3, 7, 22, 0);
 }
 
 #notificationButton {
@@ -45,18 +45,24 @@ body,
   }
 }
 
-.chessBoard .chessSquare {
-  animation: expand-and-rotate 2s cubic-bezier(0.25, 0.1, 0.25, 1);
-  /* Ensures the final state persists */
+.animated_rotate {
+  animation: expand-and-rotate 1s cubic-bezier(0.25, 0.1, 0.25, 1);
   animation-fill-mode: forwards;
+}
+
+.chessBoard .chessSquare {
+  // animation: expand-and-rotate 1s cubic-bezier(0.25, 0.1, 0.25, 1);
+  // /* Ensures the final state persists */
+  // animation-fill-mode: forwards;
   width: 9vmin;
   height: 9vmin;
   max-width: 12.5vmin;
   max-height: 12.5vmin;
   border: 1vmin solid transparent;
   color: gray;
-  background-color: #76a2a3;
+  background-color: #215c6a;
   display: flex;
+  position: relative;
   justify-content: center;
   align-items: center;
   transition: border 0.08s ease-in-out;
@@ -230,7 +236,7 @@ body,
 }
 
 .chessBoard .lighterBackground {
-  background-color: #baf4f2;
+  background-color: #c7cfce;
 }
 
 .chessInlay {
@@ -302,59 +308,66 @@ body,
 }
 
 .lastMove {
-  background-color: #98cd4e !important;
+  background-color: #59ce4ce7 !important;
 
   &.lighterBackground {
-    background-color: #96da5b !important;
+    background-color: #73cb69 !important;
   }
 }
 
-@keyframes slide-in-from-left {
+@keyframes fade-in {
   0% {
-    transform: translateX(-100%);
     opacity: 0;
   }
   100% {
-    transform: translateX(0);
     opacity: 1;
   }
 }
 
-/* Apply the animation to the element */
-.animated-element {
-  display: inline-block;
-  padding: 20px;
-  background-color: #3498db;
-  color: white;
-  font-size: 1.5em;
-  animation: slide-in-from-left 1s cubic-bezier(0.25, 0.1, 0.25, 1);
-  /* Optional: you can add initial hidden state */
-  opacity: 0;
-  animation-fill-mode: forwards;
-}
+// /* Apply the animation to the element */
+// .animated-element {
+//   display: inline-block;
+//   padding: 20px;
+//   background-color: #3498db;
+//   color: white;
+//   font-size: 1.5em;
+//   animation: slide-in-from-left 1s cubic-bezier(0.25, 0.1, 0.25, 1);
+//   /* Optional: you can add initial hidden state */
+//   opacity: 0;
+//   animation-fill-mode: forwards;
+// }
+
+
 
 .glassOverlay {
-  animation: slide-in-from-left 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation: fade-in 3s cubic-bezier(1,-0.05,.71,.98);
   /* Optional: you can add initial hidden state */
   animation-fill-mode: forwards;
   position: absolute;
-  width: 90vmin;
-  height: 90vmin;
+  width: 80vmin;
+  height: 80vmin;
   z-index: 100;
-  background-color: rgba(255, 255, 255, 0.23);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  border-radius: 10%;
+  background-color: rgba(255, 255, 255, 0.173);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  border-radius: 2%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  h2{
+    font-size: 5vmin;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.842);
+  }
 
   .list {
     // margin-left: 10vmin;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: 60%;
+    width: 80%;
     z-index: 500;
     // margin: 1px;
     border: 2px solid black;
@@ -390,20 +403,7 @@ body,
     }
 
     #mainUser {
-      background-color: rgba(250, 238, 172, 0.451);
-      // border-radius: 5px;
-      // border: 2px solid black;
-      // border-bottom: 0px ;
-      // font-weight: 600;
-      // justify-content: start;
-      // align-items: center;
-      // font-size: 5vmin;
-      // padding: 1vmin;
-      // padding-left: 3vmin;
-      // &:hover{
-      //     cursor: pointer;
-      //     background-color: rgba(255, 127, 7, 0.592);
-      // }
+      background-color: rgba(173, 208, 135, 0.451);
     }
   }
 
@@ -517,6 +517,10 @@ body,
       cursor: pointer;
     }
   }
+}
+
+.users_list{
+  animation: none;
 }
 
 section {
@@ -659,7 +663,7 @@ section {
   display: flex;
   align-items: center;
   position: absolute;
-  background-color: rgba(255, 255, 255, 0.624);
+  background-color: rgba(112, 199, 253, 0.369);
   justify-content: space-between;
   align-items: center;
   width: 72.1vmin;

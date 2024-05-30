@@ -85,7 +85,8 @@ function UsersList({
         <BellIcon notifications={notificationsReceived} onClick={() => {}} />
       </Show>
 
-      <div class="glassOverlay">
+      <div class="glassOverlay users_list">
+        <h2>Online Players 🟢</h2>
         <ul class="list">
           <li class="listItem" id="mainUser">
             <div class="text">{user().username}</div>

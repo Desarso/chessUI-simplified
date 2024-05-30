@@ -68,9 +68,55 @@ function Home({}: Props) {
     window.users = users;
     checkforUser();
     listenForUserUpdates();
+    animate_pieces();
     document.addEventListener("mousedown", (e) => onMouseDown(e));
     document.ws = chessWebSocket.ws();
   });
+
+  function animate_pieces() {
+    //get all chessSquare elements
+    let squares = document.querySelectorAll(".chessSquare") as NodeListOf<HTMLElement>;
+    //add animated_rotate class
+    squares.forEach((element: HTMLElement) => {
+      element.classList.add("animated_rotate");
+    })
+
+    //get all pieces
+    let pieces = document.querySelectorAll("section.piece") as NodeListOf<HTMLElement>;
+    //loop through all pieces and make scale them down to a point
+    pieces.forEach((element: HTMLElement) => {
+      element.style.transform = "scale(0.01)";
+    });
+
+
+    //wait 4 seconds and then scale them back up one by one scattered
+    setTimeout(() => {
+      for (let i = 0; i < pieces.length; i++) {
+        setTimeout(() => {
+          pieces[i].style.transform = "scale(1)";
+          pieces[i].style.transition = "transform 1s";
+        }, i * 50);
+      }
+      //remove all piece styles
+      for (let i = 0; i < pieces.length; i++) {
+        setTimeout(() => {
+          pieces[i].style.transition = "";
+          pieces[i].style.transform = "translate(0px, 0.1px)";
+        }, 2000);
+      }
+      //remove all animate styles
+      for (let i = 0; i < squares.length; i++) {
+        setTimeout(() => {
+          squares[i].classList.remove("animated_rotate");
+        }, 2000);
+      }
+    }, 900);
+
+
+    //after that fade the glass overlay i
+
+
+  }
 
   function listenForUserUpdates() {
     document.addEventListener("usersUpdated", (event) => {

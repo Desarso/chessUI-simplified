@@ -10,9 +10,9 @@ function BallsBackground({}: Props) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     const num_balls = 300;
-    const ball_radius = 8;
-    let background_color = [8, 18, 51];
-    let ball_speed_range = [.5, 1];
+    const ball_radius = 2;
+    let background_color = [13, 9, 23];
+    let ball_speed_range = [.5, 8];
     let ball_list = [];
 
     class Ball {
@@ -23,7 +23,7 @@ function BallsBackground({}: Props) {
         this.speed_y = speed_y;
         this.radius = radius;
         // this.color = `rgb(${randomInt(0, 255)}, ${randomInt(0, 255)}, ${randomInt(0, 255)})`;
-        this.color = "rgb(255, 255, 255, .2)";
+        this.color = "rgb(255, 255, 255, .3)";
       }
 
       update() {
@@ -37,6 +37,12 @@ function BallsBackground({}: Props) {
         if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
           this.speed_y *= -1;
         }
+        //if ball is outside of canvas, move it back in
+        this.x = Math.min(Math.max(this.x, this.radius), canvas.width - this.radius);
+
+        //if any of the speed are zero change them to a tiny number
+        this.speed_x = this.speed_x === 0 ? 0.1 : this.speed_x;
+        this.speed_y = this.speed_y === 0 ? 0.1 : this.speed_y;
 
         this.handleCollisions();
       }
