@@ -103,7 +103,7 @@ export function DragDropContextProvider(props: any) {
       });
       if (target()?.ref) {
         target().ref.style.transform = `translate(${0}px, ${.1}px)`;
-        target().ref.style.zIndex = 10;
+        target().ref.style.zIndex = 0;
       }
       setCursorDown(false);
       setPreviousTarget(target());
@@ -136,7 +136,7 @@ export function DragDropContextProvider(props: any) {
       // console.log("target", target());
       if (virtualTarget()?.ref) {
         virtualTarget().ref.style.transform = `translate(${0}px, ${.1}px)`;
-        virtualTarget().ref.style.zIndex = 10;
+        virtualTarget().ref.style.zIndex = 0;
         // console.log(target().ref.style)
       }
       setVirtualCursorDown(false);

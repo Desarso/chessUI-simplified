@@ -918,9 +918,13 @@ export class Board {
         );
         return;
       } else {
-        this.getPieceAtPosition(start).type = prompotion;
+        let piece = this.getPieceAtPosition(start);
+        piece.type = prompotion;
+        piece.syncUIClass();
         this.movePiece(start, end);
         let newMove = new updateMove(start, end, this.fen);
+        newMove.turnColor =
+        this.currentTurnColor === "white" ? "black" : "white";
         newMove.crowning = true;
         newMove.crownedTo = prompotion;
         newMove.castle = isMoveCastling;
