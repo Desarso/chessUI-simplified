@@ -25,7 +25,6 @@ export class ChessWebSocket{
         this.user = user;
         let [ws, setWS] = createSignal<WebSocket>(this.createWS(this.url));
         this.ws = ws;
-        console.log("ws", this.ws());
         this.setWS = setWS;
         this.createListeners();
         this.moves = moves;
@@ -117,8 +116,6 @@ export class ChessWebSocket{
             //process game update
             if(data.type === "chessGameUpdate"){
                 await this.sleep(100);
-                console.log("chess game update", data);
-                // console.log("equal fens", data.fen == this.board().fen)
                 if(data.fen != this.board().fen){
                     const newMoves = this.getNewMoves(data.moves);
                    console.log(newMoves);

@@ -15,7 +15,6 @@ function ScoreNPieces({color, board}: Props) {
 
 
     onMount(() => {
-        console.log(board())
         document.addEventListener("boardUpdated", () => {
             setEatenPieces([])
             setScore(0)

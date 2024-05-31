@@ -1,13 +1,13 @@
 // type Props = {};
 import { Board, Move, TEST } from "../Classes/chessClasses";
 import { User, updateMove } from "../Classes/Types";
-import { createSignal, For, Show, Setter, Accessor } from "solid-js";
+import { createSignal, For, Show, Setter, Accessor, onMount } from "solid-js";
 import { DragDropContextProvider } from "./DragDropContext";
 import ChessSquare from "./ChessSquare";
 import UserName from "./UserName";
 import OpponentName from "./OpponentName";
-let mainTest = new TEST();
-mainTest.runAllTests();
+// let mainTest = new TEST();
+// mainTest.runAllTests();
 
 type Props = {
   board: Accessor<Board>;
@@ -36,9 +36,18 @@ function WhiteChessboard({
   allPieces,
   setAllPieces
 }: Props) {
-  board().displayBoard();
 
   let boardIds = getBoardIds();
+
+  onMount(() => {
+    setTimeout(() => {
+      let pieces = board().Pieces
+      pieces.forEach((e)=> e.syncUIClass())
+      
+    }, 700);
+  });
+
+
 
   //this gets the white board IDs
   //black board ID's are the same array but reversed

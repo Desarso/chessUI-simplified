@@ -22,6 +22,13 @@ body,
   justify-content: center;
 }
 
+.premove {
+  background-color: rgba(206, 154, 76, 0.9058823529) !important;
+}
+.premove.lighterBackground {
+  background-color: #cba469 !important;
+}
+
 .circle {
   border-radius: 100%;
   border: 1vmin solid transparent;
@@ -264,18 +271,39 @@ body,
   border: 1vmin solid transparent;
 }
 
+.modal-dialog {
+  width: 600px !important;
+  max-width: 600px !important;
+  --bs-modal-header-border-color: black;
+  --bs-modal-footer-border-color: black;
+}
+
 .modal-content {
-  width: 60vmin !important;
+  width: 100% !important;
   height: 20vmin !important;
   min-width: 100%;
   min-height: 100%;
+  font-weight: 600;
+  color: rgba(88, 233, 31, 0.74) !important;
+  background-color: transparent !important;
 }
 .modal-content .modal-header {
-  background-color: #76a2a3;
+  background-color: rgba(33, 91, 106, 0.9607843137);
+  font-weight: 600;
+}
+.modal-content .modal-title {
+  font-weight: 600;
 }
 .modal-content .modal-body,
 .modal-content .modal-footer {
-  background-color: #91c2c3;
+  background-color: rgba(33, 91, 106, 0.9058823529);
+  display: flex;
+  align-items: center;
+}
+.modal-content .modal-body .btn-primary,
+.modal-content .modal-footer .btn-primary {
+  color: #271b1b;
+  background-color: #3499b3;
 }
 
 .ml-\[1\] {
@@ -349,20 +377,28 @@ body,
 }
 .glassOverlay .list {
   display: flex;
+  list-style-type: none;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
   width: 80%;
-  z-index: 500;
-  border: 2px solid black;
+  z-index: 100;
+  margin: 1px;
   border-bottom: 0px;
   border-radius: 5px;
+  height: 50vh;
   padding-left: 0px !important;
 }
 .glassOverlay .list .listItem {
+  transform: translateY(-12.5vmin);
+  opacity: 0;
+  transition: opacity 0.5s, transform 0.7s;
+  height: 12.5vmin;
   display: inline-flex;
   padding: 1vmin;
   padding-left: 3vmin;
   border-bottom: 2px solid black;
+  border-right: 2px solid black;
+  border-left: 2px solid black;
   border-radius: 5px;
   font-weight: 600;
   justify-content: space-around;
@@ -382,7 +418,13 @@ body,
   color: rgba(255, 127, 7, 0.592);
   margin-left: 6%;
 }
+.glassOverlay .list .visible_list_item {
+  opacity: 1;
+  transform: translateY(0px);
+}
 .glassOverlay .list #mainUser {
+  border-top: 2px solid black;
+  margin-top: 30px;
   background-color: rgba(173, 208, 135, 0.451);
 }
 .glassOverlay .submitUsernameButton {

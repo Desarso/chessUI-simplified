@@ -71,7 +71,23 @@ function Home({}: Props) {
     animate_pieces();
     document.addEventListener("mousedown", (e) => onMouseDown(e));
     document.ws = chessWebSocket.ws();
+    window.animate_pieces = animate_pieces;
+
+    //
+
+
+
   });
+
+  createEffect(() => {
+    //wait 200 ms and then animate the pieces
+    animate_pieces();
+  });
+
+
+  createEffect(() => {
+    board().checkmate();
+  })
 
   function animate_pieces() {
     //get all chessSquare elements
@@ -95,20 +111,20 @@ function Home({}: Props) {
         setTimeout(() => {
           pieces[i].style.transform = "scale(1)";
           pieces[i].style.transition = "transform 1s";
-        }, i * 50);
+        }, i * 20);
       }
       //remove all piece styles
       for (let i = 0; i < pieces.length; i++) {
         setTimeout(() => {
           pieces[i].style.transition = "";
           pieces[i].style.transform = "translate(0px, 0.1px)";
-        }, 2000);
+        }, 1500);
       }
       //remove all animate styles
       for (let i = 0; i < squares.length; i++) {
         setTimeout(() => {
           squares[i].classList.remove("animated_rotate");
-        }, 2000);
+        }, 1500);
       }
     }, 900);
 
@@ -121,7 +137,22 @@ function Home({}: Props) {
   function listenForUserUpdates() {
     document.addEventListener("usersUpdated", (event) => {
       let newUsers = event.data.filter((dataUser) => user().id != dataUser.id);
-      setUsers([...newUsers]);
+      //check if users ids are the same
+
+      let setOfOldUserIds = new Set(users().map((user) => user.id));
+      let setOfNewUserIds = new Set(newUsers.map((user) => user.id));
+
+
+      let difference = new Set([...setOfNewUserIds].filter(x => !setOfOldUserIds.has(x)));
+
+      if (difference.size > 0) {
+        setUsers([...newUsers]);
+      }
+
+      console.log("difference", difference);
+      
+
+
     });
     document.addEventListener("notification", (event) => {
       onNotificationReceived(event.data);
@@ -148,7 +179,6 @@ function Home({}: Props) {
     });
 
     document.addEventListener("move", (event) => {
-      console.log("move event received", event);
      chessWebSocket.sendChessUpdate(board(), user()!, opponent()!, board().History)
     });
   }
@@ -199,7 +229,6 @@ function Home({}: Props) {
     if (chessData == null) {
       console.log("session storage null");
     } else {
-      console.log("session storage not null");
       let stringUser = new User(
         chessDataJson.id,
         chessDataJson.username,
@@ -208,8 +237,6 @@ function Home({}: Props) {
       setUser(stringUser);
       setInSession(true);
       chessWebSocket.beginPinging(user);
-
-      console.log("should be pinging");
       return;
     }
     chessData = localStorage.getItem("gabrielmalek/chess.data");

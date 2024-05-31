@@ -1,15 +1,14 @@
 // type Props = {};
 import { Move, TEST, Board } from "../Classes/chessClasses";
-import { createSignal, For, Show, Setter, Accessor } from "solid-js";
+import { createSignal, For, Show, Setter, Accessor, onMount } from "solid-js";
 import { DragDropContextProvider } from "./DragDropContext";
 import board from "./WhiteChessboard";
 import { User, updateMove } from "../Classes/Types";
 import ChessSquare from "./ChessSquare";
 import OpponentName from "./OpponentName";
 import UserName from "./UserName";
-import { all } from "axios";
-let mainTest = new TEST();
-mainTest.runAllTests();
+// let mainTest = new TEST();
+// mainTest.runAllTests();
 
 type Props = {
   board: any;
@@ -42,7 +41,6 @@ function BlackChessboard({
   allPieces,
   setAllPieces
 }: Props) {
-  board().displayBoard();
 
   let boardIds = getBoardIds();
 
@@ -57,6 +55,14 @@ function BlackChessboard({
     }
     return boardIds;
   }
+
+  onMount(() => {
+    setTimeout(() => {
+      let pieces = board().Pieces
+      pieces.forEach((e)=> e.syncUIClass())
+      
+    }, 700);
+  });
 
   //need to keep track of board more dynamically so that it updates better
   let eatenPieces: any = [];
@@ -80,6 +86,8 @@ function BlackChessboard({
     board().moveLegally(move.from, move.to, selection.toLowerCase());
     // let move = {start: lastMove().from, end: lastMove().to};
   }
+
+
 
   //later I will make a black board, and white board component and just change all the settings accordingly
   return (

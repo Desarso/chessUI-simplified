@@ -147,6 +147,8 @@ function ChessSquare({
     let to: string;
 
     onDragStart(() => {
+
+
       if (displayInlay()) return;
       if(board().moveIndex != board().History.length-1) return;
       from = draggable.ref.parentElement.id;
@@ -210,22 +212,33 @@ function ChessSquare({
 
     }, draggable);
 
+
+  const currentPieceColor = board().getPieceByPosition(id)?.color;
+  const canDrag = color === currentPieceColor;
+
     let piece = board().getPieceByPosition(id);
+
     if (piece === undefined) {
       return <section ref={draggable.ref} class="noDrag"></section>;
     }
+    piece.noDrag = !canDrag;
 
-    piece = piece.UIComponent;
-    draggable.ref = piece;
-    piece.ref = draggable.ref;
+    let uiPiece = piece.UIComponent;
+    draggable.ref = uiPiece;
+    uiPiece.ref = draggable.ref;
+     
+
+
     
 
-    return piece;
+    return uiPiece;
   };
 
   function delay(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
+
+
 
 
   return (

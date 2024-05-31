@@ -9,11 +9,14 @@ const queen = "q";
 const rook = "r";
 
 import MoveSound from "../Soundfiles/move-self.mp3";
+import { create } from "domain";
+import { createSign } from "crypto";
+import { Accessor, Setter, Signal, createSignal } from "solid-js";
 const moveSound = new Audio(MoveSound);
 
- // this.board().capturedPieces = newBoard.capturedPieces;
-                    // this.board().Pieces = newBoard.Pieces; // this.board().capturedPieces = newBoard.capturedPieces;
-                    // this.board().Pieces = newBoard.Pieces;
+// this.board().capturedPieces = newBoard.capturedPieces;
+// this.board().Pieces = newBoard.Pieces; // this.board().capturedPieces = newBoard.capturedPieces;
+// this.board().Pieces = newBoard.Pieces;
 export class V2D {
   x: number;
   y: number;
@@ -243,6 +246,7 @@ export class Piece {
   private position: Position;
   color: string;
   type: string;
+  noDrag: boolean = false;
   UIComponent: any = null;
   appended: boolean = true;
 
@@ -253,15 +257,22 @@ export class Piece {
   }
 
   public removeUIComponent() {
-      this.UIComponent.remove();
-      this.appended = false;
+    this.UIComponent.remove();
+    this.appended = false;
   }
 
-  public syncUIClass(){
-    if(this.UIComponent){
+  public syncUIClass() {
+    if (this.UIComponent) {
       this.UIComponent.classList = [];
       this.UIComponent.classList.add("piece");
-      this.UIComponent.classList.add(this.color === "white" ? this.type.toUpperCase() : this.type.toLowerCase());
+      this.UIComponent.classList.add(
+        this.color === "white"
+          ? this.type.toUpperCase()
+          : this.type.toLowerCase()
+      );
+      if (this.noDrag) {
+        this.UIComponent.classList.add("noDrag");
+      }
     }
   }
 
@@ -347,11 +358,14 @@ export class Board {
   enPassantTargetSquare: string = "-";
   legalMoves: Move[] = [];
   inCheck = false;
-  checkMate = false;
+  checkMateSignal: Signal<boolean> = createSignal(false);
+  checkmate: Accessor<boolean> = this.checkMateSignal[0];
+  setCheckmate: Setter<boolean> = this.checkMateSignal[1];
   capturedPieces: Piece[] = [];
-   // this.board().capturedPieces = newBoard.capturedPieces; // this.board().capturedPieces = newBoard.capturedPieces;
-                    // this.board().Pieces = newBoard.Pieces;
-                    // this.board().Pieces = newBoard.Pieces;: HTMLElement[] = [];
+  premove: updateMove | null = null;
+  // this.board().capturedPieces = newBoard.capturedPieces; // this.board().capturedPieces = newBoard.capturedPieces;
+  // this.board().Pieces = newBoard.Pieces;
+  // this.board().Pieces = newBoard.Pieces;: HTMLElement[] = [];
   History: updateMove[] = [];
   moveIndex: number = -1;
   inLastMove: boolean = true;
@@ -427,7 +441,7 @@ export class Board {
       ];
     }
     //I will create 32 UI pieces upon initializing the board
-    
+
     const fenregex =
       /^([rnbqkpRNBQKP1-8]+\/){7}([rnbqkpRNBQKP1-8]+)\s[bw]\s(-|K?Q?k?q?)\s(-|[a-h][36])\s(0|[1-9][0-9]*)\s([1-9][0-9]*)/;
 
@@ -449,8 +463,7 @@ export class Board {
 
     let UIPieces: HTMLElement[] = [];
     for (let i = 0; i < 64; i++) {
-      if (board[i] != " " && board[i] != undefined){
-
+      if (board[i] != " " && board[i] != undefined) {
         let newSection = document.createElement("section");
         newSection.classList.add("piece");
         // console.log(board[i])
@@ -460,52 +473,45 @@ export class Board {
         newSection.appendChild(newDiv);
         newSection.dataset.position = this.convertToPosition(i);
         UIPieces.push(newSection);
-      };
-
-    this.Pieces = [];
-    for (let i = 0; i < board.length; i++) {
-      let piece = board[i];
-      if (piece != " ") {
-        let color = piece == piece.toUpperCase() ? "white" : "black";
-        let type = piece.toLowerCase();
-        let position = this.convertToPosition(i);
-        let newPiece = new Piece(position, color, type);
-        this.Pieces.push(newPiece);
       }
-    }
 
-    for(let i=0;i<this.Pieces.length;i++){
-      this.Pieces[i].UIComponent = UIPieces[i];
-    }
-   
+      this.Pieces = [];
+      for (let i = 0; i < board.length; i++) {
+        let piece = board[i];
+        if (piece != " ") {
+          let color = piece == piece.toUpperCase() ? "white" : "black";
+          let type = piece.toLowerCase();
+          let position = this.convertToPosition(i);
+          let newPiece = new Piece(position, color, type);
+          this.Pieces.push(newPiece);
+        }
+      }
 
-     
+      for (let i = 0; i < this.Pieces.length; i++) {
+        this.Pieces[i].UIComponent = UIPieces[i];
+      }
     }
     this.UIPieces = UIPieces;
     this.board = board;
     fen != undefined ? (this.fen = fen) : (this.fen = this.boardToFen());
   }
 
-
   public getUIPieceByPosition(position: string) {
-      let parentelement = document.getElementById(position);
-      if(parentelement){
-        let piece = parentelement.querySelector(".piece");
-        if(piece){
-          return piece;
-        }
+    let parentelement = document.getElementById(position);
+    if (parentelement) {
+      let piece = parentelement.querySelector(".piece");
+      if (piece) {
+        return piece;
       }
-
-
+    }
   }
 
-  public getPieceByPosition(position: string){
-    for(let i=0;i<this.Pieces.length;i++){
-      if(this.Pieces[i].getPosition() === position){
+  public getPieceByPosition(position: string) {
+    for (let i = 0; i < this.Pieces.length; i++) {
+      if (this.Pieces[i].getPosition() === position) {
         return this.Pieces[i];
       }
     }
-
   }
 
   private convertToPosition(boardIndex: number): string {
@@ -632,10 +638,6 @@ export class Board {
     let piece = this.Pieces[pieceIndex];
 
     if (piece?.type === undefined) {
-      this.displayBoard();
-      console.log(this.Pieces);
-      console.log(this.fen);
-      console.log(start);
       throw new Error("Invalid move");
     }
 
@@ -822,7 +824,7 @@ export class Board {
     this.inCheck = this.isInCheck(this);
     // console.log("inside",this.isInCheck(this));
   }
-  
+
   public async moveLegally(start: string, end: string, prompotion: string) {
     //first get list of current legal moves
     let legalMoves = this.findLegalMoves(this);
@@ -830,30 +832,29 @@ export class Board {
     let isMoveEnPassant = this.isMoveEnPassant(start, end);
     let possibleEatenPiece = this.getPieceAtPosition(end);
     let targetPawn;
+    let piece = this.getPieceAtPosition(start);
     await this.goForwardToLastMove(true);
     // console.log(isMoveEnPassant);
     // console.log(this.enPassantTargetSquare)
 
-
-    if(this.enPassantTargetSquare != "-"){
+    if (this.enPassantTargetSquare != "-") {
       let enPassantPosition = new Position(this.enPassantTargetSquare);
-     
-    if (isMoveEnPassant) {
-      if (this.currentTurnColor === "white") {
-        targetPawn = this.getPieceAtPosition(
-          this.convertToPosition(enPassantPosition.boardIndex + 8)
-        );
+
+      if (isMoveEnPassant) {
+        if (this.currentTurnColor === "white") {
+          targetPawn = this.getPieceAtPosition(
+            this.convertToPosition(enPassantPosition.boardIndex + 8)
+          );
+        } else {
+          targetPawn = this.getPieceAtPosition(
+            this.convertToPosition(enPassantPosition.boardIndex - 8)
+          );
+        }
       } else {
-        targetPawn = this.getPieceAtPosition(
-          this.convertToPosition(enPassantPosition.boardIndex - 8)
-        );
+        targetPawn = "";
       }
-    }else{
-      targetPawn = ""
     }
-    }
-   
-    
+
     //then check if the move is in the list of legal moves
     let legal = false;
     for (let i = 0; i < legalMoves.length; i++) {
@@ -863,6 +864,15 @@ export class Board {
     }
     if (!legal) {
       console.error("Illegal move");
+      //if the piece moved is the current turn color we dont want to remove the premove indicator
+
+      if (piece.color != this.currentTurnColor) {
+        this.removePremoveIndicator();
+        if (this.premove) {
+          this.premove = null;
+        }
+        this.preMove(start, end, prompotion);
+      }
       return;
     }
     //then check if I am promoting a pawn, if so. I must pass a promotion type
@@ -873,6 +883,13 @@ export class Board {
     ) {
       if (prompotion === undefined) {
         console.error("Illegal move");
+        if (piece.color != this.currentTurnColor) {
+          this.removePremoveIndicator();
+          if (this.premove) {
+            this.premove = null;
+          }
+          this.preMove(start, end, prompotion);
+        }
         return;
       } else {
         let piece = this.getPieceAtPosition(start);
@@ -891,6 +908,7 @@ export class Board {
           newMove.eating = true;
           this.capturedPieces.push(possibleEatenPiece);
           possibleEatenPiece.appended = false;
+          possibleEatenPiece.removeUIComponent();
         }
         this.History.push(newMove);
         this.setLastMoveUIIndicator(newMove);
@@ -905,6 +923,21 @@ export class Board {
           },
         });
         document.dispatchEvent(event);
+        if (this.premove) {
+          await this.moveLegally(
+            this.premove.from,
+            this.premove.to,
+            this.premove.crownedTo
+          );
+          this.premove = null;
+          this.removePremoveIndicator();
+        }
+        //check if in checkmate
+        legalMoves = this.findLegalMoves(this);
+        if (legalMoves.length === 0) {
+          this.setCheckmate(true);
+        }
+
         return;
       }
     } else if (
@@ -924,7 +957,7 @@ export class Board {
         this.movePiece(start, end);
         let newMove = new updateMove(start, end, this.fen);
         newMove.turnColor =
-        this.currentTurnColor === "white" ? "black" : "white";
+          this.currentTurnColor === "white" ? "black" : "white";
         newMove.crowning = true;
         newMove.crownedTo = prompotion;
         newMove.castle = isMoveCastling;
@@ -933,21 +966,35 @@ export class Board {
           newMove.eating = true;
           possibleEatenPiece.appended = false;
           this.capturedPieces.push(possibleEatenPiece);
+          possibleEatenPiece.removeUIComponent();
         }
         this.History.push(newMove);
         this.setLastMoveUIIndicator(newMove);
         this.moveIndex++;
         await moveSound.play();
-          //create a move event
-          const event = new CustomEvent("move", {
-            detail: {
-              start: start,
-              end: end,
-              promotion: prompotion,
-            },
-          });
-          document.dispatchEvent(event);
-        
+        //create a move event
+        const event = new CustomEvent("move", {
+          detail: {
+            start: start,
+            end: end,
+            promotion: prompotion,
+          },
+        });
+        document.dispatchEvent(event);
+        if (this.premove) {
+          await this.moveLegally(
+            this.premove.from,
+            this.premove.to,
+            this.premove.crownedTo
+          );
+          this.premove = null;
+          this.removePremoveIndicator();
+        }
+        legalMoves = this.findLegalMoves(this);
+        if (legalMoves.length === 0) {
+          this.setCheckmate(true);
+        }
+
         return;
       }
     }
@@ -957,21 +1004,20 @@ export class Board {
     newMove.castle = isMoveCastling;
     // console.log(possibleEatenPiece);
     if (possibleEatenPiece != "") {
-  
       newMove.capturePiece = possibleEatenPiece.type;
       newMove.eating = true;
+      possibleEatenPiece.removeUIComponent();
     }
     if (isMoveEnPassant) {
       newMove.enPassant = true;
       newMove.enPassantSquare = targetPawn.getPosition();
       targetPawn.removeUIComponent();
-      ;
     }
     this.History.push(newMove);
 
     await delay(1);
 
-    for(let i=0;i<this.Pieces.length;i++){
+    for (let i = 0; i < this.Pieces.length; i++) {
       this.Pieces[i].syncUIPosition();
     }
     this.setLastMoveUIIndicator(newMove);
@@ -987,21 +1033,83 @@ export class Board {
     });
     document.dispatchEvent(event);
     await delay(10);
-    this.Pieces.forEach((e)=> e.syncUIClass());
-    this.Pieces.forEach((e)=> e.syncUIPosition());
+    this.Pieces.forEach((e) => e.syncUIClass());
+    this.Pieces.forEach((e) => e.syncUIPosition());
 
     this.moveIndex++;
 
-
-    //whenever we move a piece, we want to automatically check every piece, and everyUI piece, and update it's position
+    //if there is a premove, then we want to execute it
+    if (this.premove) {
+      await this.moveLegally(
+        this.premove.from,
+        this.premove.to,
+        this.premove.crownedTo
+      );
+      this.premove = null;
+      this.removePremoveIndicator();
+    }
+    legalMoves = this.findLegalMoves(this);
+    if (legalMoves.length === 0) {
+      this.setCheckmate(true);
+    }
   }
 
-  public setLastMoveUIIndicator(move: updateMove){
+  public async preMove(start: string, end: string, promotion: string) {
+    //check if the piece is opposite color
+    let piece = this.getPieceAtPosition(start);
+    if (piece === "") {
+      console.error("No piece at start position");
+      return;
+    }
+    if (piece.color == this.currentTurnColor) {
+      return;
+    }
+    //we simply check if the move is legal and then add it to the premove
+    //next turn we will move the piece if it is legal with the moveLegally function
+    let board = new Board(undefined, this.fen);
+    board.currentTurnColor =
+      board.currentTurnColor === "white" ? "black" : "white";
+    console.log(board.currentTurnColor);
+    let legalMoves = this.findPseudoLegalMoves(board);
+    console.log(board);
+    console.log(legalMoves);
+    let legal = false;
+    for (let i = 0; i < legalMoves.length; i++) {
+      if (legalMoves[i].start === start && legalMoves[i].end === end) {
+        legal = true;
+      }
+    }
+    if (!legal) {
+      console.error("Illegal move");
+      return;
+    }
+    start = start;
+    this.premove = new updateMove(start, end, this.fen);
+    this.premove.crownedTo = promotion;
+    //we also want to set the premove indicator on the UI
+    this.setPremoveIndicator(start, end);
+  }
+
+  public async setPremoveIndicator(start: string, end: string) {
+    let startUI = document.getElementById(start);
+    let endUI = document.getElementById(end);
+    startUI.classList.add("premove");
+    endUI.classList.add("premove");
+  }
+
+  public async removePremoveIndicator() {
     let allSquare = document.querySelectorAll(".chessSquare");
-    for(let i=0;i<allSquare.length;i++){
+    for (let i = 0; i < allSquare.length; i++) {
+      allSquare[i].classList.remove("premove");
+    }
+  }
+
+  public setLastMoveUIIndicator(move: updateMove) {
+    let allSquare = document.querySelectorAll(".chessSquare");
+    for (let i = 0; i < allSquare.length; i++) {
       allSquare[i].classList.remove("lastMove");
     }
-    if(move === undefined) return;
+    if (move === undefined) return;
     let lastMove = move;
     let start = lastMove.from;
     let end = lastMove.to;
@@ -1011,9 +1119,9 @@ export class Board {
     endUI.classList.add("lastMove");
   }
 
-  public async getCapturedPieceFromElement(UIPiece: Element){
-    for(let i=0;i<this.capturedPieces.length;i++){
-      if(this.capturedPieces[i].UIComponent.id === UIPiece.id){
+  public async getCapturedPieceFromElement(UIPiece: Element) {
+    for (let i = 0; i < this.capturedPieces.length; i++) {
+      if (this.capturedPieces[i].UIComponent.id === UIPiece.id) {
         console.log(this.capturedPieces[i].UIComponent.id, UIPiece.id);
         return this.capturedPieces[i];
       }
@@ -1021,7 +1129,7 @@ export class Board {
   }
 
   private async goForwardOneMove(instant: boolean = false) {
-    console.log(this.History[this.moveIndex+1])
+    console.log(this.History[this.moveIndex + 1]);
     if (this.History.length === 0) {
       return;
     }
@@ -1039,18 +1147,21 @@ export class Board {
     }
   }
 
-  public async executeUIMove(move: updateMove, instant: boolean= false){
-    if(move === undefined) return;
+  public async executeUIMove(move: updateMove, instant: boolean = false) {
+    if (move === undefined) return;
     let piece = this.getUIPieceByPosition(move.from);
     let possibleCapturedPiece = this.getUIPieceByPosition(move.to);
     let normalized = await this.getNormalizedVectorFromMove(move.from, move.to);
     let toSquare = document.getElementById(move.to);
     //no do the move, making sure to do the hardest things first
-    if(move.castle){
+    if (move.castle) {
       //first move kings the rook
-      switch(move.to){
+      switch (move.to) {
         case "g1":
-          let rookNormalized = await this.getNormalizedVectorFromMove("h1", "f1");
+          let rookNormalized = await this.getNormalizedVectorFromMove(
+            "h1",
+            "f1"
+          );
           let rook = this.getUIPieceByPosition("h1");
           await this.moveUIPiece(rookNormalized, rook, instant);
           let rookTo = document.getElementById("f1");
@@ -1059,7 +1170,10 @@ export class Board {
 
           break;
         case "c1":
-          let rookNormalized2 = await this.getNormalizedVectorFromMove("a1", "d1");
+          let rookNormalized2 = await this.getNormalizedVectorFromMove(
+            "a1",
+            "d1"
+          );
           let rook2 = this.getUIPieceByPosition("a1");
           await this.moveUIPiece(rookNormalized2, rook2, instant);
           let rookTo2 = document.getElementById("d1");
@@ -1067,7 +1181,10 @@ export class Board {
           await this.setUIPositionToZero(rook2);
           break;
         case "g8":
-          let rookNormalized3 = await this.getNormalizedVectorFromMove("h8", "f8");
+          let rookNormalized3 = await this.getNormalizedVectorFromMove(
+            "h8",
+            "f8"
+          );
           let rook3 = this.getUIPieceByPosition("h8");
           await this.moveUIPiece(rookNormalized3, rook3, instant);
           let rookTo3 = document.getElementById("f8");
@@ -1075,56 +1192,59 @@ export class Board {
           await this.setUIPositionToZero(rook3);
           break;
         case "c8":
-          let rookNormalized4 = await this.getNormalizedVectorFromMove("a8", "d8");
+          let rookNormalized4 = await this.getNormalizedVectorFromMove(
+            "a8",
+            "d8"
+          );
           let rook4 = this.getUIPieceByPosition("a8");
           await this.moveUIPiece(rookNormalized4, rook4, instant);
           let rookTo4 = document.getElementById("d8");
           rookTo4.appendChild(rook4);
           await this.setUIPositionToZero(rook4);
-          break;  
+          break;
       }
-
-
-
-
     }
-    if(move.capturePiece){
-       //then remove the piece
-       let captured =await this.getCapturedPieceFromElement(possibleCapturedPiece);
-       captured?.removeUIComponent();
-        
-
+    if (move.capturePiece) {
+      //then remove the piece
+      let captured = await this.getCapturedPieceFromElement(
+        possibleCapturedPiece
+      );
+      captured?.removeUIComponent();
     }
-    if(move.crowning){
+    if (move.crowning) {
       //we take the UI piece and change it's class
-      if(move.turnColor === "white"){
-        piece?.classList.remove('P');
+      if (move.turnColor === "white") {
+        piece?.classList.remove("P");
         piece?.classList.add(move.crownedTo.toUpperCase());
-      }else{
-        piece?.classList.remove('p');
+      } else {
+        piece?.classList.remove("p");
         piece?.classList.add(move.crownedTo.toLowerCase());
       }
     }
 
-    await this.moveUIPiece(normalized, piece, instant );
+    await this.moveUIPiece(normalized, piece, instant);
     toSquare?.appendChild(piece);
     await this.setUIPositionToZero(piece);
     !instant ? await moveSound.play() : null;
   }
 
-
-
-  public async executeUIMoveReverse(move: updateMove, instant: boolean= false){
+  public async executeUIMoveReverse(
+    move: updateMove,
+    instant: boolean = false
+  ) {
     let piece = this.getUIPieceByPosition(move.to);
     let normalized = await this.getNormalizedVectorFromMove(move.to, move.from);
     let fromSquare = document.getElementById(move.from);
     let toSquare = document.getElementById(move.to);
     //no do the move, making sure to do the hardest things first
-    if(move.castle){
+    if (move.castle) {
       //first move kings the rook
-      switch(move.to){
+      switch (move.to) {
         case "g1":
-          let rookNormalized = await this.getNormalizedVectorFromMove("f1", "h1");
+          let rookNormalized = await this.getNormalizedVectorFromMove(
+            "f1",
+            "h1"
+          );
           let rook = this.getUIPieceByPosition("f1");
           await this.moveUIPiece(rookNormalized, rook, instant);
           let rookTo = document.getElementById("h1");
@@ -1132,7 +1252,10 @@ export class Board {
           await this.setUIPositionToZero(rook);
           break;
         case "c1":
-          let rookNormalized2 = await this.getNormalizedVectorFromMove("d1", "a1");
+          let rookNormalized2 = await this.getNormalizedVectorFromMove(
+            "d1",
+            "a1"
+          );
           let rook2 = this.getUIPieceByPosition("d1");
           await this.moveUIPiece(rookNormalized2, rook2, instant);
           let rookTo2 = document.getElementById("a1");
@@ -1140,7 +1263,10 @@ export class Board {
           await this.setUIPositionToZero(rook2);
           break;
         case "g8":
-          let rookNormalized3 = await this.getNormalizedVectorFromMove("f8", "h8");
+          let rookNormalized3 = await this.getNormalizedVectorFromMove(
+            "f8",
+            "h8"
+          );
           let rook3 = this.getUIPieceByPosition("f8");
           await this.moveUIPiece(rookNormalized3, rook3, instant);
           let rookTo3 = document.getElementById("h8");
@@ -1148,39 +1274,43 @@ export class Board {
           await this.setUIPositionToZero(rook3);
           break;
         case "c8":
-          let rookNormalized4 = await this.getNormalizedVectorFromMove("d8", "a8");
+          let rookNormalized4 = await this.getNormalizedVectorFromMove(
+            "d8",
+            "a8"
+          );
           let rook4 = this.getUIPieceByPosition("d8");
           await this.moveUIPiece(rookNormalized4, rook4, instant);
           let rookTo4 = document.getElementById("a8");
           rookTo4.appendChild(rook4);
           await this.setUIPositionToZero(rook4);
-          break;  
+          break;
       }
-
-
     }
-    if(move.capturePiece){
-       //then remove the piece
-       console.log("need to add piece back")
-     for(let i=0;i<this.capturedPieces.length;i++){
-        if(this.capturedPieces[i].type === move.capturePiece && this.capturedPieces[i].color != move.turnColor && this.capturedPieces[i].appended === false){
+    if (move.capturePiece) {
+      //then remove the piece
+      console.log("need to add piece back");
+      for (let i = 0; i < this.capturedPieces.length; i++) {
+        if (
+          this.capturedPieces[i].type === move.capturePiece &&
+          this.capturedPieces[i].color != move.turnColor &&
+          this.capturedPieces[i].appended === false
+        ) {
           let captured = this.capturedPieces[i];
           toSquare?.appendChild(captured.UIComponent);
           captured.appended = true;
           break;
         }
-     }
-    }
-    if(move.crowning){
-      //we take the UI piece and change it's class
-      if(move.turnColor === "white"){
-        piece?.classList.remove(move.crownedTo.toUpperCase());
-        piece?.classList.add('P');
-      }else{
-        piece?.classList.remove(move.crownedTo.toLowerCase());
-        piece?.classList.add('p');
       }
-
+    }
+    if (move.crowning) {
+      //we take the UI piece and change it's class
+      if (move.turnColor === "white") {
+        piece?.classList.remove(move.crownedTo.toUpperCase());
+        piece?.classList.add("P");
+      } else {
+        piece?.classList.remove(move.crownedTo.toLowerCase());
+        piece?.classList.add("p");
+      }
     }
     await this.moveUIPiece(normalized, piece, instant);
     fromSquare?.appendChild(piece);
@@ -1188,31 +1318,37 @@ export class Board {
     !instant ? await moveSound.play() : null;
   }
 
-  public async setUIPositionToZero(piece: HTMLElement){
+  public async setUIPositionToZero(piece: HTMLElement) {
     piece.style.transform = `translate(0.1px, 0.1px)`;
   }
 
-  public async moveUIPiece(normalizedVector: V2D, UIPiece: HTMLElement, instant: boolean= false){
+  public async moveUIPiece(
+    normalizedVector: V2D,
+    UIPiece: HTMLElement,
+    instant: boolean = false
+  ) {
     for (let i = 0; i < normalizedVector.magnitude; i++) {
       UIPiece.style.transform = `translate(${normalizedVector.x * i}px, ${
         normalizedVector.y * i
       }px)`;
-      if (i% 15 ===0 && !instant) {
+      if (i % 15 === 0 && !instant) {
         await this.sleep(1);
-      } 
+      }
     }
-  } 
+  }
 
   private async sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-
-  private async getNormalizedVectorFromMove(from: string, to: string): Promise<V2D>{
+  private async getNormalizedVectorFromMove(
+    from: string,
+    to: string
+  ): Promise<V2D> {
     let currentSquare = document.getElementById(from);
     let targetSquare = document.getElementById(to);
     let currentSquareRect = currentSquare.getBoundingClientRect();
-    let currentCords =  {
+    let currentCords = {
       x: currentSquareRect?.x + currentSquareRect?.width / 2,
       y: currentSquareRect?.y + currentSquareRect?.height / 2,
     };
@@ -1232,8 +1368,6 @@ export class Board {
 
     return normalizedVector;
   }
-
-
 
   private isMoveCastling(from: string, to: string): boolean {
     let fromPos = new Position(from);
@@ -1712,8 +1846,6 @@ export class Board {
       "rnbqkbnr/1ppp1ppp/8/p3Q3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3"
     );
     moves = this.findLegalMoves(board);
-    // console.log(moves, "test 2");
-    // board.displayBoard();
     tests.push(moves.length == 3);
 
     board = new Board(
@@ -1756,14 +1888,6 @@ export class Board {
     //I think find the oppoinsing moves for black
     let opponentMoves =
       boardToSeeIfInCheck.findPseudoLegalMoves(boardToSeeIfInCheck);
-    // console.log("possible moves for oponent");
-    // boardToSeeIfInCheck.displayBoard();
-    // console.log("oponentMoves",opponentMoves);
-    // console.log("boardFen", boardToSeeIfInCheck.fen);
-
-    //then I get the index for a king
-    //now my oponent moves is the opposite of the current turn color
-    //then I get the index from the current board that was passed in
     let currentKingIndex;
     for (let i = 0; i < board.Pieces.length; i++) {
       if (
@@ -1837,7 +1961,7 @@ export class Board {
     let pos = new V2D(index % 8, Math.floor(index / 8));
     let color = piece.color;
 
-    if (color != this.currentTurnColor) return moves;
+    if (color != board.currentTurnColor) return moves;
 
     if (color == "white") {
       //check if there is a piece in front remember white is on the bottom.\\
@@ -2429,8 +2553,6 @@ export class Board {
 
   private testFindBishopMoves() {
     let board = new Board([]);
-    // board.displayBoard();
-    // console.log(board.Pieces);
     let piece = new Piece("a2", "white", bishop);
     board.addPiece(piece);
     let moves = board.findBishopMoves(piece, board);
@@ -2464,9 +2586,6 @@ export class Board {
     piece = new Piece("b3", "white", bishop);
     board.addPiece(piece);
     moves = board.findBishopMoves(piece, board);
-    // console.log(moves.length)
-    // console.log(moves);
-    // board.displayBoard()
     if (moves.length !== 9) {
       console.log("testFindBishopMoves failed 3");
       return;
@@ -2821,7 +2940,6 @@ export function deepEqual(x: any, y: any): boolean {
         }, true)
     : x === y;
 }
-
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onMount, Accessor, Setter } from "solid-js";
+import { For, Show, createSignal, onMount, Accessor, Setter, createEffect } from "solid-js";
 import CatLogo from "./CatLogo";
 import { User, Notification } from "../Classes/Types";
 import axios from "axios";
@@ -32,6 +32,19 @@ function UsersList({
   >([]);
   const [showNotification, setShowNotification] = createSignal(false);
 
+  createEffect(() => {
+  console.log("main user: ", user());
+  console.log("users in UsersList: ", users());
+    let list_items = document.getElementsByClassName("listItem");
+    //add visible_list_item class to all list items but wait 10 ms
+    setTimeout(() => {
+      for (let i = 0; i < list_items.length; i++) {
+        list_items[i].classList.add("visible_list_item");
+    }}, 100);
+ 
+
+  })
+
   onMount(() => {
 
     document.addEventListener("notification", (event) => {
@@ -55,6 +68,7 @@ function UsersList({
       setShowNotification(true);
       
     });
+
 
   });
   

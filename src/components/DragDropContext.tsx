@@ -214,6 +214,7 @@ export function DragDropContextProvider(props: any) {
           });
       //create listener for virtual pointerdown
       draggable.ref.addEventListener("virtualpointerdown", (e : any) => {
+        if(!draggable.ref.classList.contains("noDrag")) return;
         setVirtualTarget(draggable);
         for(let i = 0; i < draggable.dragStart.length; i++){
             draggable.dragStart[i](draggable);
