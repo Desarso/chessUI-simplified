@@ -273,7 +273,7 @@ body,
 
 .modal-dialog {
   width: 600px !important;
-  max-width: 600px !important;
+  max-width: 90vw !important;
   --bs-modal-header-border-color: black;
   --bs-modal-footer-border-color: black;
 }
